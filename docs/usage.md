@@ -1,6 +1,6 @@
 # Usage — fieldops-ui
 
-Package: `@pranad/fieldops-ui` (npmjs).
+Package: `@pranadwaghmare2/fieldops-ui` (npmjs).
 
 Install and host setup: see [README](../README.md).
 
@@ -29,7 +29,7 @@ Pressable with variants, sizes, loading, disabled, optional leading icon. Forwar
 | `accessibilityLabel` | `string` | Prefer when children are not plain text |
 
 ```tsx
-import { Button } from '@pranad/fieldops-ui';
+import { Button } from '@pranadwaghmare2/fieldops-ui';
 
 <Button variant="primary" size="md" onPress={save} isLoading={saving}>
   Save
@@ -119,7 +119,7 @@ Status tone from the library token map (`open`, `in_progress`, `blocked`, `done`
 ## Preset
 
 ```js
-require('@pranad/fieldops-ui/preset');
+require('@pranadwaghmare2/fieldops-ui/preset');
 ```
 
 Ships FieldOps colors, spacing, radius, and screens for host Tailwind configs.

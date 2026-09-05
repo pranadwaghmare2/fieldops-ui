@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "expo": "~51.0.39",
-    "@pranad/fieldops-ui": "file:..",
+    "@pranadwaghmare2/fieldops-ui": "^0.1.0",
     "nativewind": "^4.1.23",
     "react": "18.2.0",
     "react-native": "0.74.5",

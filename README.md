@@ -3,18 +3,18 @@
 Five token-driven React Native components for field operations. Supports NativeWind
 `className` and React Native `style` overrides.
 
-Published as **`@pranad/fieldops-ui`** on **npmjs** (public).
+Published as **`@pranadwaghmare2/fieldops-ui`** on **npmjs** (public).
 
 Full API: [docs/usage.md](docs/usage.md).
 
 ## Install
 
 ```sh
-npm install @pranad/fieldops-ui
+npm install @pranadwaghmare2/fieldops-ui
 # or
-yarn add @pranad/fieldops-ui
+yarn add @pranadwaghmare2/fieldops-ui
 # or
-pnpm add @pranad/fieldops-ui
+pnpm add @pranadwaghmare2/fieldops-ui
 ```
 
 Peers: `react`, `react-native`, `nativewind` (v4). NativeWind hosts also need
@@ -39,11 +39,11 @@ module.exports = {
   content: [
     './App.{js,jsx,ts,tsx}',
     './src/**/*.{js,jsx,ts,tsx}',
-    './node_modules/@pranad/fieldops-ui/lib/**/*.{js,jsx,ts,tsx}',
+    './node_modules/@pranadwaghmare2/fieldops-ui/lib/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [
     require('nativewind/preset'),
-    require('@pranad/fieldops-ui/preset'),
+    require('@pranadwaghmare2/fieldops-ui/preset'),
   ],
 };
 ```
@@ -53,7 +53,7 @@ module.exports = {
 ### Without NativeWind
 
 ```tsx
-import { Button } from '@pranad/fieldops-ui';
+import { Button } from '@pranadwaghmare2/fieldops-ui';
 
 <Button style={{ opacity: 0.8 }} onPress={handleSave}>
   Save
@@ -69,7 +69,7 @@ import {
   Select,
   Text,
   TextField,
-} from '@pranad/fieldops-ui';
+} from '@pranadwaghmare2/fieldops-ui';
 
 <Button variant="primary" onPress={handleSave} isLoading={isSaving}>
   Save
@@ -97,6 +97,9 @@ import {
 ## Local examples
 
 `example-expo/` and `example-bare/` are for development only — not published.
+They depend on the **npmjs** package `@pranadwaghmare2/fieldops-ui` (not `file:..`).
+
+Install examples **after** the library is published:
 
 ```sh
 # Expo
@@ -111,10 +114,11 @@ Yarn / pnpm work the same way in each example folder.
 
 ## Publish (maintainers)
 
-After merging to `main`, from an npm account that owns the **`pranad`** scope:
+After merging to `main`, from npm user **`pranadwaghmare2`**:
 
 ```sh
 npm login
+npm whoami   # must print pranadwaghmare2
 npm publish --access public
 ```
 
