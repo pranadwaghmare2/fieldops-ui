@@ -25,12 +25,12 @@ Exactly five entries at handoff. Each must include the rejected option and why.
 - **Rejected:** NativeWind-only defaults (non-NW hosts render unstyled); pretending `className` works without NativeWind; adding Emotion/styled-components.
 - **How:** `core/tokens` → parallel recipes in `core/styles`; law in `060-nativewind.mdc`; README documents both host types.
 
-### TextField right adornment as composable hatch
+### TextField end adornment as composable hatch
 
 - **Why:** Requirements require one genuine escape hatch among the five components.
-- **What:** TextField optional right adornment slot (render prop / `ReactNode`).
+- **What:** TextField optional `endAdornment?: React.ReactNode` (RTL-friendly name for the right/end slot).
 - **Rejected:** Inventing a sixth “Slot” component; making Select the only hatch before TextField covers form DX.
-- **How:** Documented on `TextFieldProps` + TSDoc `@remarks`; risk-surface test in `020-testing.mdc`.
+- **How:** Documented on `TextFieldProps` + TSDoc `@remarks`; risk-surface tests in `TextField.test.tsx`.
 
 ### Select long list via FlatList
 
