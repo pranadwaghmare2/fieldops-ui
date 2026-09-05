@@ -102,9 +102,9 @@ Be specific. This section matters more than the others. Name the thing not built
 
 Append on first use of a tool in a work stream.
 
-- **Tool:** Cursor Agent (Composer) + brainstorming skill  
-  - **Where:** Decisions log rubric; library design alignment (rules `060`/`070`, dual style path, publish shape); `docs/decisions.md` fill; design spec under `docs/specs/`  
-  - **Not used for:** Five-component implementation (deferred until implementation plan)
+- **Tool:** Cursor Agent (Composer) + brainstorming skill
+  - **Where:** Library design alignment; scaffold, tokens, styling ports, core recipes, preset, tests, and decision documentation
+  - **Not used for:** Consuming-app domain code
 
 - **Tool:** caveman communication mode  
   - **Where:** Design dialogue compression only  
