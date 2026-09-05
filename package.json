@@ -1,6 +1,7 @@
 {
   "name": "fieldops-ui",
   "version": "0.1.0",
+  "license": "MIT",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -16,6 +17,7 @@
   },
   "files": [
     "lib",
+    "!lib/**/*.test.*",
     "README.md",
     "LICENSE"
   ],
