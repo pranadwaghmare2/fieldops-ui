@@ -42,9 +42,9 @@ Exactly five entries at handoff. Each must include the rejected option and why.
 ### Bob lean publish + npmjs + dual examples excluded
 
 - **Why:** Requirements: real bob build; consumers must not need source tree; examples must not bloat the tarball; reviewers need a zero-token public install.
-- **What:** Scoped name `@pranad/fieldops-ui` on npmjs (`publishConfig.access: public`); `prepare: bob build`; `module` + `typescript`; `files` whitelist `lib` + `preset.cjs` + README/LICENSE; `example-expo` + `example-bare` local only.
-- **Rejected:** GitHub Packages (PAT for every consumer); shipping `src` + examples in tarball; javascript-obfuscator; pnpm-only consumer story; unscoped `fieldops-ui` (collision risk across candidates).
-- **How:** `package.json` exports `.` and `./preset` (`require` → `preset.cjs`); README install via npm/yarn/pnpm; `npm publish --access public`.
+- **What:** Scoped name `@pranadwaghmare2/fieldops-ui` on npmjs (`publishConfig.access: public`); `prepare: bob build`; `module` + `typescript`; `files` whitelist `lib` + `preset.cjs` + README/LICENSE; examples stay out of the tarball and depend on the published npm package (`^0.1.0`), not `file:..`.
+- **Rejected:** GitHub Packages (PAT for every consumer); `@pranad/...` scope (npm user is `pranadwaghmare2`); shipping `src` + examples in tarball; javascript-obfuscator; pnpm-only consumer story; unscoped `fieldops-ui` (collision risk across candidates).
+- **How:** `package.json` exports `.` and `./preset` (`require` → `preset.cjs`); README install via npm/yarn/pnpm; `npm publish --access public` as `pranadwaghmare2`.
 
 ### Candidates (prune before handoff)
 
@@ -58,13 +58,13 @@ How styles and tokens cross the installable package boundary, and what that cost
 
 - **Problem:** Class strings inside a published package do nothing unless the **host** runs NativeWind (babel/metro/css) and Tailwind `content` includes the library’s compiled files. Skipping the shipped preset makes token utilities (`bg-primary`, etc.) miss or diverge. Without a StyleSheet fallback, non-NW hosts would get empty defaults.
 - **Solution:**
-  - Peer `nativewind` (v4); ship `@pranad/fieldops-ui/preset` (`preset.cjs` for CJS `require`) with FieldOps tokens + native-oriented `screens`.
-  - Bob `lib/` keeps class strings; host `content` includes `node_modules/@pranad/fieldops-ui/lib/**/*`.
-  - Host steps documented: presets `[nativewind/preset, @pranad/fieldops-ui/preset]`, babel, `withNativeWind`, `global.css`.
+  - Peer `nativewind` (v4); ship `@pranadwaghmare2/fieldops-ui/preset` (`preset.cjs` for CJS `require`) with FieldOps tokens + native-oriented `screens`.
+  - Bob `lib/` keeps class strings; host `content` includes `node_modules/@pranadwaghmare2/fieldops-ui/lib/**/*`.
+  - Host steps documented: presets `[nativewind/preset, @pranadwaghmare2/fieldops-ui/preset]`, babel, `withNativeWind`, `global.css`.
   - Dual path: `resolveDualStyles` + StyleSheet fallback for non-NW; `className` for NW hosts.
   - Styling third-party libs stay behind `core/integrations/styling`.
   - Dual examples prove Expo and bare RN wiring; neither ships in the package.
-  - Distribute via public npmjs as `@pranad/fieldops-ui` (no consumer token).
+  - Distribute via public npmjs as `@pranadwaghmare2/fieldops-ui` (no consumer token).
 - **Cost:** Host setup burden; peer version pins (NW v4 + Tailwind 3); dual recipe maintenance (class + StyleSheet); silent unstyled `className` if `content` wrong; two examples to maintain; lean tarball discipline (`files` / `.npmignore`).
 
 ---
@@ -95,15 +95,15 @@ Be specific. This section matters more than the others. Name the thing not built
 
 - **Cut:** Shipping example apps inside the npm tarball (examples stay in git, including bare `ios/`/`android/`)  
   - **Why:** Lean tarball; reviewers still get install-and-run demos from the repo.  
-  - **Rejected alternative:** Monorepo app shipped as part of `@pranad/fieldops-ui` publish.
+  - **Rejected alternative:** Monorepo app shipped as part of `@pranadwaghmare2/fieldops-ui` publish.
 
 - **Cut:** Committing `docs/superpowers/`, `docs/plans/`, `docs/specs/`, `.superpowers/` agent scratch  
   - **Why:** Local agent noise; product docs stay `requirements` / `decisions` / `usage`.  
   - **Rejected alternative:** Rewriting all git history to scrub plans (option A).
 
 - **Cut:** GitHub Packages as the install registry  
-  - **Why:** Reviewers need a zero-token public install; npmjs scoped `@pranad/fieldops-ui` is enough uniqueness.  
-  - **Rejected alternative:** `publishConfig.registry` → `npm.pkg.github.com` (PAT for every consumer).
+  - **Why:** Reviewers need a zero-token public install; scope matches npm user `pranadwaghmare2`.  
+  - **Rejected alternative:** `publishConfig.registry` → `npm.pkg.github.com`; publishing as `@pranad/fieldops-ui` without owning that npm scope.
 
 ---
 

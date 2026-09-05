@@ -1,17 +1,11 @@
 # FieldOps UI bare React Native example
 
-Consumes `@pranad/fieldops-ui` via `file:..` (same as a published install). Includes
-committed `ios/` and `android/` for RN 0.74.
+Consumes **`@pranadwaghmare2/fieldops-ui` from npmjs** (`^0.1.0`), not a local `file:..` link.
+Includes committed `ios/` and `android/` for RN 0.74.
 
 ## Run
 
-From the repository root, build the library once if `lib/` is missing:
-
-```sh
-npm install && npm run build
-```
-
-Then:
+Publish the library first (`npm publish --access public` from repo root on `main`), then:
 
 ```sh
 cd example-bare
@@ -26,5 +20,5 @@ npm run ios
 ## NativeWind
 
 - Babel: `nativewind/babel` + Reanimated last
-- Metro: `withNativeWind` + parent `watchFolders` for `file:..`
-- Tailwind: `nativewind/preset` + `@pranad/fieldops-ui/preset`, content scans `lib/`
+- Metro: `withNativeWind` on the app config
+- Tailwind: `nativewind/preset` + `@pranadwaghmare2/fieldops-ui/preset`, content scans `node_modules/.../lib/`
