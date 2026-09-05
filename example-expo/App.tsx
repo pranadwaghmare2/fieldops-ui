@@ -2,7 +2,10 @@ import './global.css';
 
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+} from 'react-native-safe-area-context';
 
 import { Badge, Button, Select, Text, TextField } from 'fieldops-ui';
 
@@ -21,54 +24,56 @@ export default function App() {
   const [saveCount, setSaveCount] = useState(0);
 
   return (
-    <SafeAreaView className="flex-1 bg-bg">
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="gap-6 px-4 py-8"
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="gap-2">
-          <Text role="title">FieldOps UI</Text>
-          <Text className="text-fg-muted">
-            Expo consumer using the published preset and NativeWind.
-          </Text>
-        </View>
-
-        <View className="gap-3 rounded-md border border-border bg-surface p-4">
-          <Text role="heading">Work order</Text>
-          <TextField
-            label="Assignee"
-            placeholder="Enter a name"
-            helperText="The technician assigned to this work order."
-            value={assignee}
-            onChangeText={setAssignee}
-            endAdornment={<Text role="caption">Required</Text>}
-          />
-          <Select
-            accessibilityLabel="Work order status"
-            options={statusOptions}
-            value={status}
-            onValueChange={setStatus}
-          />
-          <View className="flex-row flex-wrap gap-2">
-            <Badge status={status}>
-              {statusOptions.find((option) => option.value === status)?.label}
-            </Badge>
-            <Badge status="blocked">Blocked</Badge>
-            <Badge status="done">Done</Badge>
-          </View>
-        </View>
-
-        <Button
-          variant="primary"
-          onPress={() => setSaveCount((count) => count + 1)}
+    <SafeAreaProvider>
+      <SafeAreaView className="flex-1 bg-bg">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="gap-6 px-4 py-8"
+          keyboardShouldPersistTaps="handled"
         >
-          Save work order
-        </Button>
-        <Text role="caption" className="text-center text-fg-muted">
-          Saved {saveCount} {saveCount === 1 ? 'time' : 'times'}
-        </Text>
-      </ScrollView>
-    </SafeAreaView>
+          <View className="gap-2">
+            <Text role="title">FieldOps UI</Text>
+            <Text className="text-fg-muted">
+              Expo consumer using the published preset and NativeWind.
+            </Text>
+          </View>
+
+          <View className="gap-3 rounded-md border border-border bg-surface p-4">
+            <Text role="heading">Work order</Text>
+            <TextField
+              label="Assignee"
+              placeholder="Enter a name"
+              helperText="The technician assigned to this work order."
+              value={assignee}
+              onChangeText={setAssignee}
+              endAdornment={<Text role="caption">Required</Text>}
+            />
+            <Select
+              accessibilityLabel="Work order status"
+              options={statusOptions}
+              value={status}
+              onValueChange={setStatus}
+            />
+            <View className="flex-row flex-wrap gap-2">
+              <Badge status={status}>
+                {statusOptions.find((option) => option.value === status)?.label}
+              </Badge>
+              <Badge status="blocked">Blocked</Badge>
+              <Badge status="done">Done</Badge>
+            </View>
+          </View>
+
+          <Button
+            variant="primary"
+            onPress={() => setSaveCount((count) => count + 1)}
+          >
+            Save work order
+          </Button>
+          <Text role="caption" className="text-center text-fg-muted">
+            Saved {saveCount} {saveCount === 1 ? 'time' : 'times'}
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
