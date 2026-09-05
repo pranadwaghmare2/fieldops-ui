@@ -3,6 +3,7 @@ import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import {
   composeClassName,
   composeStyle,
+  resolveDualStyles,
 } from '../../core/integrations/styling';
 import { fieldMessageRecipe } from '../../core/styles/field';
 import { selectRecipe } from '../../core/styles/select';
@@ -51,11 +52,17 @@ export function getSelectStyles(
   const trigger = selectRecipe(hasError);
   const label = textRecipe('body');
   const error = fieldMessageRecipe(true);
+  const resolvedTrigger = resolveDualStyles({
+    defaultClassName: trigger.className,
+    defaultStyle: trigger.style,
+    className,
+    style,
+  });
 
   return {
     trigger: {
-      className: composeClassName(trigger.className, className),
-      style: composeStyle(trigger.style, style) as StyleProp<ViewStyle>,
+      className: resolvedTrigger.className,
+      style: resolvedTrigger.style as StyleProp<ViewStyle>,
     },
     label,
     indicator: {

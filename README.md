@@ -1,36 +1,37 @@
 # fieldops-ui
 
-Five token-driven React Native components for field operations. Components
-support NativeWind `className` overrides and React Native `style` overrides.
+Five token-driven React Native components for field operations. Supports NativeWind
+`className` and React Native `style` overrides.
+
+Published as **`@pranad/fieldops-ui`** on **npmjs** (public).
+
+Full API: [docs/usage.md](docs/usage.md).
 
 ## Install
 
-Install the library with your package manager:
-
 ```sh
-npm install fieldops-ui
+npm install @pranad/fieldops-ui
 # or
-yarn add fieldops-ui
+yarn add @pranad/fieldops-ui
 # or
-pnpm add fieldops-ui
+pnpm add @pranad/fieldops-ui
 ```
 
-`react`, `react-native`, and `nativewind` are peer dependencies. NativeWind
-hosts also need the packages from the
-[NativeWind installation guide](https://www.nativewind.dev/docs/getting-started/installation):
+Peers: `react`, `react-native`, `nativewind` (v4). NativeWind hosts also need
+`react-native-reanimated`, `react-native-safe-area-context`, and `tailwindcss@^3`
+per the [NativeWind install guide](https://www.nativewind.dev/docs/getting-started/installation).
 
-```sh
-npm install nativewind react-native-reanimated react-native-safe-area-context
-npm install --save-dev tailwindcss@^3
-```
+## Host matrix
 
-Use the equivalent `yarn add` or `pnpm add` commands when appropriate.
+| Host | Appearance |
+| --- | --- |
+| Expo + NativeWind | `className` + token preset |
+| Bare RN + NativeWind | same |
+| No NativeWind | StyleSheet token defaults + `style` only |
 
-## NativeWind host setup
+### NativeWind setup
 
-NativeWind is configured by the consuming app, not by this library. Complete
-NativeWind's Babel, Metro (`withNativeWind`), and `global.css` setup, then add
-both presets and scan the compiled library:
+Configure Babel, Metro (`withNativeWind`), and `global.css` in the **host**, then:
 
 ```js
 // tailwind.config.js
@@ -38,88 +39,86 @@ module.exports = {
   content: [
     './App.{js,jsx,ts,tsx}',
     './src/**/*.{js,jsx,ts,tsx}',
-    './node_modules/fieldops-ui/lib/**/*.{js,jsx,ts,tsx}',
+    './node_modules/@pranad/fieldops-ui/lib/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [
     require('nativewind/preset'),
-    require('fieldops-ui/preset'),
+    require('@pranad/fieldops-ui/preset'),
   ],
 };
 ```
 
-The `fieldops-ui/preset` entry exposes the same colors, spacing, radius, and
-responsive screens used by the components' native defaults. Import your
-NativeWind `global.css` from the app entry point after completing the host
-setup.
+`./preset` resolves to a CJS wrapper (`preset.cjs`) for `require()`.
 
 ### Without NativeWind
 
-Components still render their token defaults through React Native styles.
-Override them with the `style` prop. A `className` prop is accepted but React
-Native does not apply utility classes unless the host configures NativeWind.
-
 ```tsx
+import { Button } from '@pranad/fieldops-ui';
+
 <Button style={{ opacity: 0.8 }} onPress={handleSave}>
   Save
 </Button>
 ```
 
-## Components
-
-### Button
+## Quick examples
 
 ```tsx
-import { Button } from 'fieldops-ui';
+import {
+  Badge,
+  Button,
+  Select,
+  Text,
+  TextField,
+} from '@pranad/fieldops-ui';
 
 <Button variant="primary" onPress={handleSave} isLoading={isSaving}>
   Save
-</Button>;
-```
+</Button>
 
-### Text
-
-```tsx
-import { Text } from 'fieldops-ui';
-
-<Text role="heading">Work orders</Text>;
-```
-
-### TextField
-
-```tsx
-import { TextField } from 'fieldops-ui';
+<Text role="heading">Work orders</Text>
 
 <TextField
   label="Email"
   value={email}
   onChangeText={setEmail}
-  placeholder="name@example.com"
-/>;
-```
-
-`TextField` also accepts an `endAdornment` node for controls such as password
-visibility toggles or unit labels.
-
-### Select
-
-```tsx
-import { Select } from 'fieldops-ui';
+  endAdornment={<Button variant="ghost">Show</Button>}
+/>
 
 <Select
   accessibilityLabel="Status"
   options={[{ label: 'Open', value: 'open' }]}
   value="open"
   onValueChange={setStatus}
-/>;
+/>
+
+<Badge status="in_progress">In progress</Badge>
 ```
 
-### Badge
+## Local examples
 
-```tsx
-import { Badge } from 'fieldops-ui';
+`example-expo/` and `example-bare/` are for development only — not published.
 
-<Badge status="in_progress">In progress</Badge>;
+```sh
+# Expo
+cd example-expo && npm install && npm start
+
+# Bare RN (includes ios/ + android/)
+cd example-bare && npm install && npm run android
+# or: npm run ios
 ```
+
+Yarn / pnpm work the same way in each example folder.
+
+## Publish (maintainers)
+
+After merging to `main`, from an npm account that owns the **`pranad`** scope:
+
+```sh
+npm login
+npm publish --access public
+```
+
+Bump `version` in `package.json` before each release. Reviewers install with no token.
 
 ## License
 

@@ -5,10 +5,7 @@ import type {
   ViewStyle,
 } from 'react-native';
 
-import {
-  composeClassName,
-  composeStyle,
-} from '../../core/integrations/styling';
+import { resolveDualStyles } from '../../core/integrations/styling';
 import {
   buttonLabelRecipe,
   buttonRecipe,
@@ -39,14 +36,17 @@ export function getButtonStyles(
 ): ButtonStyles {
   const containerRecipe = buttonRecipe(variant, size);
   const labelRecipe = buttonLabelRecipe(variant);
+  const container = resolveDualStyles({
+    defaultClassName: containerRecipe.className,
+    defaultStyle: containerRecipe.style,
+    className,
+    style,
+  });
 
   return {
     container: {
-      className: composeClassName(containerRecipe.className, className),
-      style: composeStyle(
-        containerRecipe.style,
-        style
-      ) as StyleProp<ViewStyle>,
+      className: container.className,
+      style: container.style as StyleProp<ViewStyle>,
     },
     label: {
       className: labelRecipe.className,

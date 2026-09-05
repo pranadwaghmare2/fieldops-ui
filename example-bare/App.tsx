@@ -5,7 +5,7 @@ import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
 
-import { Badge, Button, Select, Text, TextField } from 'fieldops-ui';
+import { Badge, Button, Select, Text, TextField } from '@pranad/fieldops-ui';
 
 const statusOptions = [
   { label: 'Open', value: 'open' },

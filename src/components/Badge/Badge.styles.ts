@@ -1,9 +1,6 @@
 import type { StyleProp, TextStyle } from 'react-native';
 
-import {
-  composeClassName,
-  composeStyle,
-} from '../../core/integrations/styling';
+import { resolveDualStyles } from '../../core/integrations/styling';
 import { badgeRecipe } from '../../core/styles/badge';
 import type { StatusKey } from '../../core/tokens';
 
@@ -16,9 +13,15 @@ export function getBadgeStyles(
   style?: StyleProp<TextStyle>
 ): { className: string; style: StyleProp<TextStyle> } {
   const recipe = badgeRecipe(status);
+  const resolved = resolveDualStyles({
+    defaultClassName: recipe.className,
+    defaultStyle: recipe.style,
+    className,
+    style,
+  });
 
   return {
-    className: composeClassName(recipe.className, className),
-    style: composeStyle(recipe.style, style) as StyleProp<TextStyle>,
+    className: resolved.className,
+    style: resolved.style as StyleProp<TextStyle>,
   };
 }

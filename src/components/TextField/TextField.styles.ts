@@ -3,6 +3,7 @@ import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import {
   composeClassName,
   composeStyle,
+  resolveDualStyles,
 } from '../../core/integrations/styling';
 import {
   fieldMessageRecipe,
@@ -44,27 +45,30 @@ export function getTextFieldStyles(
   const input = textRecipe('body');
   const label = textRecipe('label');
   const message = fieldMessageRecipe(hasError);
+  const layout = { alignItems: 'center' as const, flexDirection: 'row' as const };
+
+  const resolvedContainer = resolveDualStyles({
+    defaultClassName: composeClassName(container.className, 'flex-row items-center'),
+    defaultStyle: composeStyle(container.style, layout),
+    className,
+    style,
+  });
+
+  const resolvedInput = resolveDualStyles({
+    defaultClassName: composeClassName(input.className, 'flex-1 p-0'),
+    defaultStyle: composeStyle(input.style, { flex: 1, padding: 0 }),
+    className: inputClassName,
+    style: inputStyle,
+  });
 
   return {
     container: {
-      className: composeClassName(
-        container.className,
-        'flex-row items-center',
-        className
-      ),
-      style: composeStyle(
-        container.style,
-        { alignItems: 'center', flexDirection: 'row' },
-        style
-      ) as StyleProp<ViewStyle>,
+      className: resolvedContainer.className,
+      style: resolvedContainer.style as StyleProp<ViewStyle>,
     },
     input: {
-      className: composeClassName(input.className, 'flex-1 p-0', inputClassName),
-      style: composeStyle(
-        input.style,
-        { flex: 1, padding: 0 },
-        inputStyle
-      ) as StyleProp<TextStyle>,
+      className: resolvedInput.className,
+      style: resolvedInput.style as StyleProp<TextStyle>,
     },
     label: {
       className: composeClassName(label.className, 'mb-1'),

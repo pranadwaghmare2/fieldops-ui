@@ -20,10 +20,10 @@ Exactly five entries at handoff. Each must include the rejected option and why.
 
 ### Dual style path (`className` + `style`)
 
-- **Why:** NativeWind hosts need `className`; hosts that skip NativeWind still need token defaults and overrides. Tailwind utilities without NativeWind on RN are impossible.
-- **What:** Token defaults as StyleSheet recipes (always) plus class recipes (NW). Consumer `style` last in RN style array; consumer `className` via merge port.
-- **Rejected:** NativeWind-only defaults (non-NW hosts render unstyled); pretending `className` works without NativeWind; adding Emotion/styled-components.
-- **How:** `core/tokens` → parallel recipes in `core/styles`; law in `060-nativewind.mdc`; README documents both host types.
+- **Why:** NativeWind hosts need `className`; hosts that skip NativeWind still need token defaults and overrides. Tailwind utilities without NativeWind on RN are impossible. NativeWind also gives `style` precedence over `className`, so always-applied StyleSheet defaults would defeat consumer utilities.
+- **What:** Token defaults as StyleSheet recipes plus class recipes. `resolveDualStyles` skips StyleSheet defaults when the consumer passes a non-empty `className`; otherwise StyleSheet defaults + consumer `style` last. Consumer `className` via merge port.
+- **Rejected:** NativeWind-only defaults (non-NW hosts render unstyled); always stacking StyleSheet defaults under NW (overrides lose); pretending `className` works without NativeWind; Emotion/styled-components.
+- **How:** `core/integrations/styling/resolveDualStyles.ts`; component `*.styles.ts` call the port; README + `docs/usage.md` document both host types.
 
 ### TextField end adornment as composable hatch
 
@@ -39,12 +39,12 @@ Exactly five entries at handoff. Each must include the rejected option and why.
 - **Rejected:** Static `.map` of all options; FlashList dependency (extra peer, not required yet).
 - **How:** `components/Select`; no layout-effect size machine for the list itself.
 
-### Bob lean publish + dual examples excluded
+### Bob lean publish + npmjs + dual examples excluded
 
-- **Why:** Requirements: real bob build; consumers must not need source tree; examples must not bloat npm.
-- **What:** `prepare: bob build`; `module` + `typescript`; `files` whitelist `lib` + preset + README/LICENSE; `example-expo` + `example-bare` local only; npm/yarn/pnpm docs.
-- **Rejected:** Shipping `src` + examples in tarball; javascript-obfuscator; pnpm-only consumer story.
-- **How:** `070-publish.mdc`; package `exports` for `.` and `./preset`.
+- **Why:** Requirements: real bob build; consumers must not need source tree; examples must not bloat the tarball; reviewers need a zero-token public install.
+- **What:** Scoped name `@pranad/fieldops-ui` on npmjs (`publishConfig.access: public`); `prepare: bob build`; `module` + `typescript`; `files` whitelist `lib` + `preset.cjs` + README/LICENSE; `example-expo` + `example-bare` local only.
+- **Rejected:** GitHub Packages (PAT for every consumer); shipping `src` + examples in tarball; javascript-obfuscator; pnpm-only consumer story; unscoped `fieldops-ui` (collision risk across candidates).
+- **How:** `package.json` exports `.` and `./preset` (`require` → `preset.cjs`); README install via npm/yarn/pnpm; `npm publish --access public`.
 
 ### Candidates (prune before handoff)
 
@@ -58,12 +58,13 @@ How styles and tokens cross the installable package boundary, and what that cost
 
 - **Problem:** Class strings inside a published package do nothing unless the **host** runs NativeWind (babel/metro/css) and Tailwind `content` includes the library’s compiled files. Skipping the shipped preset makes token utilities (`bg-primary`, etc.) miss or diverge. Without a StyleSheet fallback, non-NW hosts would get empty defaults.
 - **Solution:**
-  - Peer `nativewind` (v4); ship `fieldops-ui/preset` with FieldOps tokens + native-oriented `screens`.
-  - Bob `lib/` keeps class strings; host `content` includes `node_modules/fieldops-ui/lib/**/*`.
-  - Host steps documented: presets `[nativewind/preset, fieldops-ui/preset]`, babel, `withNativeWind`, `global.css`.
-  - Dual path: StyleSheet token defaults + `style` override so non-NW hosts still work; `className` for NW hosts.
+  - Peer `nativewind` (v4); ship `@pranad/fieldops-ui/preset` (`preset.cjs` for CJS `require`) with FieldOps tokens + native-oriented `screens`.
+  - Bob `lib/` keeps class strings; host `content` includes `node_modules/@pranad/fieldops-ui/lib/**/*`.
+  - Host steps documented: presets `[nativewind/preset, @pranad/fieldops-ui/preset]`, babel, `withNativeWind`, `global.css`.
+  - Dual path: `resolveDualStyles` + StyleSheet fallback for non-NW; `className` for NW hosts.
   - Styling third-party libs stay behind `core/integrations/styling`.
-  - Dual examples prove Expo and bare RN wiring; neither ships in npm.
+  - Dual examples prove Expo and bare RN wiring; neither ships in the package.
+  - Distribute via public npmjs as `@pranad/fieldops-ui` (no consumer token).
 - **Cost:** Host setup burden; peer version pins (NW v4 + Tailwind 3); dual recipe maintenance (class + StyleSheet); silent unstyled `className` if `content` wrong; two examples to maintain; lean tarball discipline (`files` / `.npmignore`).
 
 ---
@@ -92,9 +93,17 @@ Be specific. This section matters more than the others. Name the thing not built
   - **Why:** YAGNI vs requirements five-component surface.  
   - **Rejected alternative:** Extra list virtualization peer; work-order card component.
 
-- **Cut:** Publishing examples or `docs/superpowers/` agent specs in the npm package (and keep agent specs out of git)  
-  - **Why:** Lean tarball; plans are local agent noise.  
-  - **Rejected alternative:** Monorepo app shipped as part of `fieldops-ui` publish.
+- **Cut:** Shipping example apps inside the npm tarball (examples stay in git, including bare `ios/`/`android/`)  
+  - **Why:** Lean tarball; reviewers still get install-and-run demos from the repo.  
+  - **Rejected alternative:** Monorepo app shipped as part of `@pranad/fieldops-ui` publish.
+
+- **Cut:** Committing `docs/superpowers/`, `docs/plans/`, `docs/specs/`, `.superpowers/` agent scratch  
+  - **Why:** Local agent noise; product docs stay `requirements` / `decisions` / `usage`.  
+  - **Rejected alternative:** Rewriting all git history to scrub plans (option A).
+
+- **Cut:** GitHub Packages as the install registry  
+  - **Why:** Reviewers need a zero-token public install; npmjs scoped `@pranad/fieldops-ui` is enough uniqueness.  
+  - **Rejected alternative:** `publishConfig.registry` → `npm.pkg.github.com` (PAT for every consumer).
 
 ---
 

@@ -78,6 +78,9 @@ function SelectInner<T>(
         accessibilityState={{
           ...accessibilityState,
           expanded: isExpanded,
+          // Forward-compat: TextInput keeps `invalid`; Pressable on RN ≥0.73
+          // may strip unknown AccessibilityState keys — hint still carries error.
+          ...(hasError ? { invalid: true as const } : {}),
         }}
         onPress={() => setIsExpanded((current) => !current)}
         ref={ref}
