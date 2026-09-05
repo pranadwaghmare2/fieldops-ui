@@ -77,7 +77,8 @@ Labeled input with helper/error and optional end adornment (composable escape ha
 
 ## Select
 
-Single-select from options; options list uses `FlatList`. Forwards ref to the trigger.
+Single-select from options. The options list opens in a **Modal** with `FlatList`
+virtualization (safe inside host `ScrollView`s). Forwards ref to the trigger.
 
 | Prop | Type | Notes |
 | --- | --- | --- |

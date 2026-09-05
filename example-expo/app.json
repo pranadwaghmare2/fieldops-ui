@@ -2,9 +2,12 @@
   "expo": {
     "name": "FieldOps UI Example",
     "slug": "fieldops-ui-example",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "updates": {
+      "enabled": false
+    },
     "web": {
       "bundler": "metro"
     }

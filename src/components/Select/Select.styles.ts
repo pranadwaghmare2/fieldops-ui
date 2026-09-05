@@ -23,6 +23,17 @@ interface SelectStyles {
     className: string;
     style: StyleProp<TextStyle>;
   };
+  backdrop: {
+    className: string;
+    style: StyleProp<ViewStyle>;
+  };
+  backdropDismiss: {
+    style: StyleProp<ViewStyle>;
+  };
+  sheet: {
+    className: string;
+    style: StyleProp<ViewStyle>;
+  };
   list: {
     className: string;
     style: StyleProp<ViewStyle>;
@@ -42,7 +53,7 @@ interface SelectStyles {
 }
 
 /**
- * Applies the Select trigger recipe and shallow list styles through both paths.
+ * Applies the Select trigger recipe and modal list styles through both paths.
  */
 export function getSelectStyles(
   hasError: boolean,
@@ -71,15 +82,40 @@ export function getSelectStyles(
         marginLeft: spacing[2],
       }) as StyleProp<TextStyle>,
     },
-    list: {
-      className: 'mt-1 max-h-48 rounded-md border border-border bg-bg',
+    backdrop: {
+      className: 'flex-1 justify-center px-4',
+      style: {
+        backgroundColor: `${colors.fg}66`,
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: spacing[4],
+      },
+    },
+    backdropDismiss: {
+      style: {
+        bottom: 0,
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        top: 0,
+      },
+    },
+    sheet: {
+      className: 'max-h-64 overflow-hidden rounded-md border border-border bg-bg',
       style: {
         backgroundColor: colors.bg,
         borderColor: colors.border,
         borderRadius: radius.md,
         borderWidth: 1,
-        marginTop: spacing[1],
-        maxHeight: spacing[8] * 6,
+        maxHeight: spacing[8] * 8,
+        overflow: 'hidden',
+      },
+    },
+    list: {
+      className: 'max-h-64 bg-bg',
+      style: {
+        backgroundColor: colors.bg,
+        maxHeight: spacing[8] * 8,
       },
     },
     option: {

@@ -50,6 +50,23 @@ describe('Select', () => {
     expect(screen.UNSAFE_getByType(FlatList)).toBeTruthy();
   });
 
+  it('closes the modal when dismiss is pressed', () => {
+    render(
+      <Select
+        accessibilityLabel="Status"
+        onValueChange={jest.fn()}
+        options={options}
+        value="open"
+      />
+    );
+
+    fireEvent.press(screen.getByRole('button', { name: 'Status' }));
+    expect(screen.getByTestId('select-options-list')).toBeTruthy();
+
+    fireEvent.press(screen.getByRole('button', { name: 'Dismiss options' }));
+    expect(screen.queryByTestId('select-options-list')).toBeNull();
+  });
+
   it('exposes and displays its error state', () => {
     render(
       <Select

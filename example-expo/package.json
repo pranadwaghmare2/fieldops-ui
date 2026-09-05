@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pranadwaghmare2/fieldops-ui": "^0.1.0",
+    "@pranadwaghmare2/fieldops-ui": "^0.1.1",
     "expo": "~51.0.39",
     "nativewind": "4.1.23",
     "react": "18.2.0",

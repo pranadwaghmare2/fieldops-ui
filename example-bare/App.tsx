@@ -53,10 +53,20 @@ export default function App() {
               value={status}
               onValueChange={setStatus}
             />
+            <Text role="caption" className="text-fg-muted">
+              Change status with the Select above. Badges below are read-only
+              tone demos.
+            </Text>
+            <Badge status={status}>
+              {statusOptions.find((option) => option.value === status)?.label}
+            </Badge>
+          </View>
+
+          <View className="gap-2">
+            <Text role="label">Badge tones (read-only)</Text>
             <View className="flex-row flex-wrap gap-2">
-              <Badge status={status}>
-                {statusOptions.find((option) => option.value === status)?.label}
-              </Badge>
+              <Badge status="open">Open</Badge>
+              <Badge status="in_progress">In progress</Badge>
               <Badge status="blocked">Blocked</Badge>
               <Badge status="done">Done</Badge>
             </View>

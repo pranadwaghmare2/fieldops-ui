@@ -32,17 +32,17 @@ Exactly five entries at handoff. Each must include the rejected option and why.
 - **Rejected:** Inventing a sixth “Slot” component; making Select the only hatch before TextField covers form DX.
 - **How:** Documented on `TextFieldProps` + TSDoc `@remarks`; risk-surface tests in `TextField.test.tsx`.
 
-### Select long list via FlatList
+### Select long list via FlatList in Modal
 
-- **Why:** Requirements: Select must work with a long list; keep tree shallow for New Arch / jank less.
-- **What:** RN `FlatList` virtualization for options.
-- **Rejected:** Static `.map` of all options; FlashList dependency (extra peer, not required yet).
-- **How:** `components/Select`; no layout-effect size machine for the list itself.
+- **Why:** Requirements: Select must work with a long list; keep tree shallow for New Arch / jank less. Inline FlatList inside host `ScrollView` triggers RN VirtualizedList nesting warnings.
+- **What:** RN `FlatList` virtualization for options, presented inside a transparent `Modal` when expanded.
+- **Rejected:** Inline FlatList only; FlashList dependency; map-vs-FlatList dual path by length.
+- **How:** `components/Select`; dismiss backdrop closes; no layout-effect size machine for the list itself.
 
 ### Bob lean publish + npmjs + dual examples excluded
 
 - **Why:** Requirements: real bob build; consumers must not need source tree; examples must not bloat the tarball; reviewers need a zero-token public install.
-- **What:** Scoped name `@pranadwaghmare2/fieldops-ui` on npmjs (`publishConfig.access: public`); `prepare: bob build`; `module` + `typescript`; `files` whitelist `lib` + `preset.cjs` + README/LICENSE; examples stay out of the tarball and depend on the published npm package (`^0.1.0`), not `file:..`.
+- **What:** Scoped name `@pranadwaghmare2/fieldops-ui` on npmjs (`publishConfig.access: public`); `prepare: bob build`; `module` + `typescript`; `files` whitelist `lib` + `preset.cjs` + README/LICENSE; examples stay out of the tarball and depend on the published npm package (`^0.1.1`), not `file:..`.
 - **Rejected:** GitHub Packages (PAT for every consumer); `@pranad/...` scope (npm user is `pranadwaghmare2`); shipping `src` + examples in tarball; javascript-obfuscator; pnpm-only consumer story; unscoped `fieldops-ui` (collision risk across candidates).
 - **How:** `package.json` exports `.` and `./preset` (`require` → `preset.cjs`); README install via npm/yarn/pnpm; `npm publish --access public` as `pranadwaghmare2`.
 
