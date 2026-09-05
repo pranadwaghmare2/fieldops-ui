@@ -35,6 +35,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
     {
       accessibilityHint,
       accessibilityLabel,
+      accessibilityState,
       className,
       endAdornment,
       errorMessage,
@@ -71,6 +72,10 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
               errorMessage ?? accessibilityHint
             }
             accessibilityLabel={accessibilityLabel ?? label}
+            accessibilityState={{
+              ...accessibilityState,
+              ...(hasError ? { invalid: true } : {}),
+            }}
             onChangeText={onChangeText}
             placeholder={placeholder}
             placeholderTextColor={colors.fgMuted}
