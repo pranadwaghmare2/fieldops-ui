@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2020",
+    "types": ["jest", "react", "react-native"]
+  },
+  "include": ["src", "test"],
+  "exclude": ["lib", "node_modules", "example-expo", "example-bare"]
+}

@@ -4,8 +4,11 @@ node_modules/
 # Bob output
 lib/
 
-# Agent / brainstorming artifacts (do not commit plans)
+# Agent / design scratch (not product docs)
+.superpowers/
 docs/superpowers/
+docs/plans/
+docs/specs/
 
 # Examples — native / tooling junk (apps themselves stay in git; not in npm)
 example-expo/node_modules/
@@ -16,8 +19,10 @@ example-bare/.expo/
 example/**/.expo/
 **/Pods/
 **/build/
-*.xcworkspace
-!default.xcworkspace
+**/.gradle/
+**/DerivedData/
+*.xcuserstate
+**/xcuserdata/
 
 # Tests / coverage
 coverage/
@@ -27,6 +32,7 @@ coverage/
 .env
 .env.*
 !.env.example
+.npmrc
 
 # Logs & OS
 npm-debug.log*

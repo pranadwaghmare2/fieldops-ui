@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": ".",
+    "types": ["react", "react-native"]
+  },
+  "include": ["src"],
+  "exclude": [
+    "lib",
+    "node_modules",
+    "test",
+    "example-expo",
+    "example-bare",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}
