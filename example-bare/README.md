@@ -1,6 +1,6 @@
 # FieldOps UI bare React Native example
 
-Consumes **`@pranadwaghmare2/fieldops-ui` from npmjs** (`^0.1.0`), not a local `file:..` link.
+Consumes **`@pranadwaghmare2/fieldops-ui` from npmjs** (`^0.1.1`), not a local `file:..` link.
 Includes committed `ios/` and `android/` for RN 0.74.
 
 ## Run

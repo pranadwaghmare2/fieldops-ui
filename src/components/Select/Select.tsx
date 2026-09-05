@@ -9,6 +9,7 @@ import {
 } from 'react';
 import {
   FlatList,
+  Modal,
   Pressable,
   Text as NativeText,
   View,
@@ -45,6 +46,10 @@ function SelectInner<T>(
     () => options.find((option) => Object.is(option.value, value)),
     [options, value]
   );
+
+  const close = useCallback(() => {
+    setIsExpanded(false);
+  }, []);
 
   const renderOption = useCallback<ListRenderItem<SelectOption<T>>>(
     ({ item }) => {
@@ -93,22 +98,34 @@ function SelectInner<T>(
         </NativeText>
       </Pressable>
 
-      {isExpanded ? (
-        <FlatList
-          data={options}
-          extraData={value}
-          keyExtractor={optionKey}
-          renderItem={renderOption}
-          testID="select-options-list"
-          {...styles.list}
-        />
-      ) : null}
+      <Modal
+        animationType="fade"
+        onRequestClose={close}
+        transparent
+        visible={isExpanded}
+      >
+        <View {...styles.backdrop}>
+          <Pressable
+            accessibilityLabel="Dismiss options"
+            accessibilityRole="button"
+            onPress={close}
+            style={styles.backdropDismiss.style}
+          />
+          <View {...styles.sheet}>
+            <FlatList
+              data={options}
+              extraData={value}
+              keyExtractor={optionKey}
+              renderItem={renderOption}
+              testID="select-options-list"
+              {...styles.list}
+            />
+          </View>
+        </View>
+      </Modal>
 
       {errorMessage ? (
-        <NativeText
-          {...styles.error}
-          accessibilityLiveRegion="polite"
-        >
+        <NativeText {...styles.error} accessibilityLiveRegion="polite">
           {errorMessage}
         </NativeText>
       ) : null}
@@ -122,8 +139,9 @@ function SelectInner<T>(
  * Consumer `className` and `style` values override the token-backed trigger.
  *
  * @remarks
- * Pressing the trigger expands an inline `FlatList`; selecting an option calls
- * `onValueChange` and closes the list. The ref forwards to the trigger.
+ * Pressing the trigger opens a `Modal` containing a `FlatList` of options so
+ * the list is not nested inside a host `ScrollView`. Selecting an option calls
+ * `onValueChange` and closes the modal. The ref forwards to the trigger.
  *
  * @example
  * ```tsx

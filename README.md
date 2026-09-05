@@ -102,8 +102,11 @@ They depend on the **npmjs** package `@pranadwaghmare2/fieldops-ui` (not `file:.
 Install examples **after** the library is published:
 
 ```sh
-# Expo
-cd example-expo && npm install && npm start
+# Expo (Android physical device: prefer tunnel if LAN fails)
+cd example-expo && npm install && npx expo start -c
+# if Expo Go cannot download the bundle:
+# npx expo start --tunnel -c
+# emulator optional: adb reverse tcp:8081 tcp:8081
 
 # Bare RN (includes ios/ + android/)
 cd example-bare && npm install && npm run android
