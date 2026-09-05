@@ -1,0 +1,81 @@
+---
+description: Grader-shaped decisions log — defend, NativeWind boundary, cuts, AI tools
+alwaysApply: true
+---
+
+# Decisions log — fieldops-ui
+
+`docs/decisions.md` is the review artifact. Commit bodies may point at it; they do not replace it.
+
+Law: `.cursor/rules/030-decisions.mdc`. Shape: four fixed sections below. Micro-format inside defend/cut entries uses Why / What / Rejected / How.
+
+## When to write
+
+Same turn as the choice. Do not defer to handoff.
+
+| Event | Section |
+| --- | --- |
+| Non-trivial library trade-off you would defend in review | §1 Five decisions to defend |
+| Preset, peers, prepare, NativeWind/Tailwind wiring across package boundary | §2 NativeWind across package boundary |
+| Deliberate non-build (scope cut, skipped approach, deferred feature) | §3 What we cut |
+| First use of an AI tool in a work stream | §4 AI tools used and where |
+
+Task that encodes a trade-off is incomplete until the matching section is updated.
+
+## §1 — Five decisions to defend
+
+Keep **exactly five** entries at handoff. Overflow goes under `### Candidates (prune before handoff)`, then merge or drop.
+
+Each final entry:
+
+```markdown
+### <short title>
+- **Why:** problem or constraint
+- **What:** option chosen
+- **Rejected:** option not taken, and why rejected
+- **How:** paths, ports, package exports, commands
+```
+
+Typical defend topics: className merge, composable escape hatch, Select long-list, styling integrations port, builder-bob/peer/entry shape.
+
+## §2 — NativeWind across package boundary
+
+One narrative. Fill when styling crosses the package boundary. Required fields:
+
+- **Problem:** what breaks if styles stay source-only or host is miswired
+- **Solution:** what shipped (preset export, peers, prepare, integrations port, consumer steps)
+- **Cost:** concrete trade-offs (setup burden, peer pins, dual build, DX friction)
+
+Do not close preset/peer/NativeWind work with this section empty.
+
+## §3 — What we cut (highest bar)
+
+This section matters more than the others. Vague “kept scope small” fails.
+
+Each cut:
+
+```markdown
+- **Cut:** specific thing not built
+- **Why:** reason
+- **Rejected alternative:** what was almost built instead
+```
+
+Good: “No dark mode.” “No sixth component.” “Select uses FlatList only after plain map proved insufficient — cut FlashList.”  
+Bad: “Avoided overengineering.”
+
+## §4 — AI tools used and where
+
+Append on first use of that tool in a work stream. No per-prompt spam.
+
+```markdown
+- **Tool:** name (e.g. Cursor Agent, Claude)
+- **Where:** what it touched (scaffold, spike, tests, docs)
+- **Not used for:** optional honesty
+```
+
+## Must not
+
+- Invent a sixth public component only to have something to log.
+- Log chat fluff or process noise as decisions.
+- Leave `<!-- replace -->` stubs in `docs/decisions.md` at handoff.
+- Treat Why/What/How dated dump as the whole file — four grader sections are mandatory.

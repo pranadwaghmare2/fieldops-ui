@@ -1,0 +1,42 @@
+---
+description: Testing minimum bar for fieldops-ui — risk surface, not coverage theatre
+alwaysApply: true
+---
+
+# Testing — fieldops-ui
+
+No coverage percentage target. Test the risk surface that protects consumers and architecture. Do not invent tests to pad numbers.
+
+## Risk surface (must cover)
+
+1. **Public prop contract** — each component renders with only required props (no crash on the default path).
+2. **Documented states** — disabled, loading, error, selected, and any other state the component advertises, at least once each.
+3. **Override merge** — (a) consumer `className` wins over the conflicting internal utility via the shared merge helper; (b) consumer `style` wins over token StyleSheet defaults. Highest-value style tests in the library.
+4. **Composable escape hatch** — the chosen composable component works with a consumer-supplied slot or render prop without breaking documented states.
+5. **Ref forwarding** — for components that document `forwardRef`, `ref.current` points at the underlying native element.
+6. **Accessibility** — interactive components expose `accessibilityRole` / `accessibilityState` (and labels where required) correctly.
+7. **Layering smoke (where practical)** — components under test must not require mocking NativeWind/`tailwind-merge` imports *inside the component file*; if the test forces that, the component is violating the integrations boundary.
+8. **Non-NativeWind defaults** — with no `className` engine assumed, token StyleSheet defaults still apply so the default path is not visually empty.
+
+## Explicitly skip
+
+- Full-tree snapshot tests — brittle, low signal.
+- Re-testing NativeWind/Tailwind class generation.
+- Visual / pixel regression — pixel fidelity is not the grading bar.
+- Asserting that a `<View>` renders a `<View>`.
+
+If a whole class of tests is deliberately skipped, log it under `docs/decisions.md` §3 (What we cut) per `030-decisions.mdc`.
+
+## Tooling & placement
+
+- `@testing-library/react-native` + Jest.
+- Query by role, label, or text — never by internal className strings.
+- One colocated test file per component: `Button.test.tsx` next to `Button.tsx`.
+- Prefer testing through the public component API. Do not mock the component under test’s own internals.
+- Pure logic in `core/logic` gets direct unit tests without rendering when behaviour is non-trivial.
+- Integration adapters in `core/integrations` get focused tests for port contracts (especially className merge, style array last-wins, and override behaviour).
+
+## Failure signals (fix design, not the test)
+
+- Need to `jest.mock` a third-party styling package from a component test because the component imported it directly → move the import behind `core/integrations`.
+- Same assertion copy-pasted across five components for identical style fragments → the recipe belongs in `core/styles` and should be tested once at the recipe or adapter level where appropriate.

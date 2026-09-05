@@ -1,0 +1,40 @@
+---
+description: Git and Conventional Commit rules for the fieldops-ui library repo
+alwaysApply: true
+---
+
+# Git & commits — fieldops-ui
+
+This repository is the UI library only. Commit messages, scopes, and examples refer to library concerns — never to a consuming app’s screens or domain modules.
+
+## Format — Conventional Commits
+
+`type(scope): summary` — imperative mood, no trailing period, ≤72 character summary line.
+
+Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`, `style`, `perf`.
+
+Scope = layer or component concern, for example:
+- `feat(button): add loading state`
+- `feat(integrations): add className merge adapter`
+- `refactor(core): extract badge status tone map`
+- `docs(readme): add install steps`
+- `docs(decisions): record Select long-list strategy`
+
+Body (optional, blank line after summary) explains **why**, not what. When the commit encodes a lasting trade-off, point at `docs/decisions.md` — logging law lives only in `030-decisions.mdc` (do not restate the four sections here).
+
+Breaking public API changes use `!` and must be intentional:
+`feat(button)!: rename onTap to onPress`
+
+## Granularity
+
+- One logical change per commit. A commit should be revertable on its own without breaking the build.
+- Sequence work the way a real library is built: scaffold → tokens/core → integrations → component types → implementation → styles wiring → tests → docs.
+- Config, dependency, and lockfile changes get their own `chore:` / `build:` commit, separate from the feature that consumes them — especially when adding a third-party package that will live behind `core/integrations`.
+- Never leave `wip` or `fixes` as the final message of a finished unit of work — reword before considering it done.
+- Formatting-only changes are their own `style:` commit; do not mix format churn with behaviour changes.
+- No secrets, `.env` files, or machine-local ports.
+
+## History hygiene
+
+- Prefer small, reviewable commits that show dependency isolation (integration adapter landed before components call it).
+- After a shared or reviewed push, do not rewrite history. Local rebase before the final handoff is fine for a solo submission.

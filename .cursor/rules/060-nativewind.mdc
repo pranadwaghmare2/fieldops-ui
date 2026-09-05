@@ -1,0 +1,96 @@
+---
+description: NativeWind v4 package-boundary law, dual style path, host duties
+alwaysApply: true
+---
+
+# NativeWind & styling — fieldops-ui
+
+Requirements demand NativeWind + a shipped token preset + predictable `className` overrides.
+This file is law for how that works across the npm package boundary. Link index for study: end of file.
+
+## Feasibility law (do not violate)
+
+| Claim | Verdict |
+| --- | --- |
+| NativeWind `className` on RN | Works when **host** wires NativeWind |
+| Tailwind CSS utilities **without** NativeWind on RN | **Impossible** — plain RN ignores `className` |
+| Native `style` / StyleSheet without NativeWind | Works — dual path below |
+| Bundle NativeWind babel/metro inside the published lib | **Forbidden** — host owns bundler |
+
+## Dual style path (approved)
+
+Every public component supports **both**:
+
+1. **`className`** — NativeWind path (requirements primary). Merge via `composeClassName` in `core/integrations/styling` (last-wins per utility group).
+2. **`style`** — React Native `StyleProp` path for hosts that skip NativeWind. Defaults come from token → StyleSheet recipes; consumer `style` appends last in the style array.
+
+**Defaults** must look correct on **both** hosts:
+
+- Token values live once in `core/tokens`.
+- `core/styles` may expose parallel recipe outputs (class fragments + StyleSheet objects) from those tokens — do not fork hex/spacing by hand in components.
+- Apply both through integrations / component `.styles.ts` only.
+
+**Behaviour props** (`variant`, `size`, `isDisabled`, …) stay first-class. Style overrides never remove them from the public API.
+
+**Do not** add Emotion, styled-components, or a third styling system.
+
+## Engine vs toolchain
+
+- **NativeWind v4** = styling engine for the `className` path (peer). Pin modern floor that NW v4 documents (RN / Expo band from design §1).
+- **Tailwind CSS v3** = host toolchain for config, `content` scan, and preset consumption — not imported inside `components/`.
+- Components never `import` from `nativewind`, `tailwind-merge`, or `class-variance-authority`. Only `core/integrations/styling` may.
+
+## Package boundary (grader §2)
+
+**Problem:** Published components carry class strings. If the host omits NativeWind wiring or omits the library from Tailwind `content`, NW styles vanish. If the host skips the shipped preset, token names diverge.
+
+**Library ships:**
+
+- Bob-built `lib/` with class strings preserved.
+- `fieldops-ui/preset` — FieldOps colours, spacing, type, radius, status maps, native-friendly `screens`.
+- Peer: `nativewind` (and documented peers for RN / React).
+- Dual defaults (class + StyleSheet) so non-NW hosts still render token defaults via `style`.
+
+**Host with NativeWind must:**
+
+1. Install `nativewind` + its peers (`tailwindcss@^3`, reanimated, safe-area per NW install docs).
+2. Babel + Metro (`withNativeWind`) + `global.css` per [NativeWind installation](https://www.nativewind.dev/docs/getting-started/installation).
+3. `presets: [require('nativewind/preset'), require('fieldops-ui/preset')]`.
+4. `content` includes app files **and** `./node_modules/fieldops-ui/lib/**/*.{js,jsx,ts,tsx}` (adjust if package layout differs).
+5. Pass `className` overrides; optional `style` still allowed.
+
+**Host without NativeWind must:**
+
+1. Still receive token defaults via StyleSheet recipes.
+2. Override with `style` (and behaviour props).
+3. Understand `className` will not apply utilities without NW — document in README.
+
+**Cost:** dual recipe maintenance; host setup docs; peer pins; silent unstyled `className` if `content` wrong; two example apps to keep honest.
+
+## Responsive size / shape
+
+- Prefer preset / host `theme.screens` + optional responsive class prefixes.
+- Discrete `size` props (`sm` | `md` | `lg`) remain the Button (etc.) API.
+- **No** `useLayoutEffect` / measure machines for phone vs tablet vs foldable unless a future requirement explicitly needs measured layout (Select anchoring, etc.).
+
+## Performance & New Architecture
+
+- JS-only components (no custom native views) — works on old and new arch.
+- Shallow trees; pass `className` / `style` to RN primitives.
+- Select long lists: virtualize (`FlatList`), do not mount huge static maps.
+- Avoid extra style Context providers when the preset covers tokens.
+
+## Composable escape hatch
+
+Primary hatch: **TextField** right adornment slot. Document in TSDoc `@remarks` and `docs/decisions.md` §1.
+
+## Study links
+
+- Overview: https://www.nativewind.dev/docs
+- Install: https://www.nativewind.dev/docs/getting-started/installation
+- Built on Tailwind: https://www.nativewind.dev/docs/core-concepts/tailwindcss
+- Content: https://www.nativewind.dev/docs/customization/content
+- Responsive: https://www.nativewind.dev/docs/core-concepts/responsive-design
+- Monorepos: https://www.nativewind.dev/docs/guides/using-with-monorepos
+- Third-party: https://www.nativewind.dev/docs/guides/third-party-components
+- Bob build: https://oss.callstack.com/react-native-builder-bob/build

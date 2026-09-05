@@ -1,0 +1,67 @@
+---
+description: Publish surface, lean npm tarball, dual examples, multi-package-manager
+alwaysApply: true
+---
+
+# Publish & repo setup — fieldops-ui
+
+Align the installable package with [react-native-builder-bob](https://oss.callstack.com/react-native-builder-bob/build) and requirements. No component implementation rules here — only ship shape.
+
+## Scaffold
+
+- Prefer `create-react-native-library` / bob init for the library root.
+- Modern version floor: NativeWind v4 + RN/Expo band that NW v4 documents (design: floor A).
+- Support **npm, yarn, and pnpm** equally for consumers and docs. Do not require pnpm-only workspace features for hosts.
+- Repo may use one lockfile for development; README install snippets show all three clients.
+
+## Bob build
+
+- `prepare`: `bob build` (works across npm / yarn / pnpm publish and git installs per bob docs).
+- Targets: `module` (esm) + `typescript` at minimum. Add `commonjs` only if a real consumer needs it.
+- Entry: `main`, `types`, `exports` for `.` and `./preset`.
+- Output in `lib/`; gitignore `lib/`.
+
+## Lean npm tarball (industry)
+
+`package.json` `files` whitelist only what hosts need, for example:
+
+- `lib/`
+- preset entry file(s) if not already under `lib/`
+- `README.md`, `LICENSE`
+
+**Never publish:**
+
+- `example-expo/`, `example-bare/` (or `example/`)
+- `__tests__`, fixtures, mocks
+- `.cursor/`, agent transcripts, `docs/superpowers/`
+- Pods, `node_modules`, build caches
+
+Consumers must not need the source tree when using the published package (requirements). Prefer shipping compiled `lib/` + types; keep className strings intact inside `lib` for NativeWind hosts.
+
+## Dual examples (dev only)
+
+- `example-expo/` — Expo host proving NativeWind wiring + preset.
+- `example-bare/` — framework-less RN host proving the same contracts.
+- Both consume the library like an external package (workspace/link), not by deep-importing `src/`.
+- Both stay out of the npm tarball via `files` (and `.npmignore` if needed).
+
+## Peers
+
+- `react`, `react-native`, `nativewind` as peers (ranges match modern floor).
+- Host installs Tailwind / babel / metro pieces per NativeWind docs — do not bundle them into `lib`.
+
+## Security / “obfuscation”
+
+- Open, readable bob output + `.d.ts` — no javascript-obfuscator (breaks Metro / class strings).
+- Supply-chain hygiene: no secrets in tarball; lockfile in repo; explicit `exports` so internals stay private.
+
+## Gitignore (minimum)
+
+- `lib/`
+- `docs/superpowers/`
+- example native build artifacts (`Pods/`, `build/`, `.expo/`)
+- `node_modules/`, coverage, OS junk
+
+## Before handoff
+
+`pnpm` / `npm` / `yarn` equivalent of: install → test → lint → build must pass once scripts exist.

@@ -1,0 +1,236 @@
+---
+description: Folder layers, dependency isolation, public API, and styling contracts for fieldops-ui
+alwaysApply: true
+---
+
+# Architecture — fieldops-ui
+
+This package is a durable React Native component library. Requirements define *what* ships.
+These rules define *how* the codebase stays stable when dependencies, themes, or APIs change.
+
+Record irreversible or non-obvious trade-offs in `docs/decisions.md` per `030-decisions.mdc` (four grader sections; Why / What / Rejected / How inside defend and cut entries).
+
+## Product boundaries
+
+- Exactly five public components: `Button`, `Text`, `TextField`, `Select`, `Badge`.
+- No app screens, navigation, networking, or consuming-app domain modules inside this package.
+- Ship a real installable build with `react-native-builder-bob` (correct peers, entry points, `prepare`). Consumers never depend on the raw source tree.
+- Ship a NativeWind/Tailwind **preset** as a separate package entry (`fieldops-ui/preset`) so host apps consume the same tokens.
+- Dual style path: token defaults via StyleSheet **and** class recipes; consumer overrides via `style` and/or `className` (see `060-nativewind.mdc`). Tailwind-without-NativeWind on RN is not supported.
+- TypeScript throughout; every public prop is typed for useful autocomplete.
+- At least one component is genuinely composable (escape hatch past defaults). Prefer that hatch among the five (for example `TextField` adornment slot or `Select` option renderer). Do not invent a sixth component to satisfy composability.
+
+## Folder structure
+
+Every path has one job. New code lands in the layer that owns that job — nowhere else.
+
+```
+src/
+  core/                         # Library kernel — stable across dependency swaps
+    tokens/                     # Canonical design values & semantic maps (pure data)
+    styles/                     # Reusable style recipes & contracts (no third-party imports)
+    logic/                      # Pure behaviour (no React, no NativeWind, no RN)
+    integrations/               # Adapters / providers wrapping third-party dependencies
+      styling/                  # NativeWind merge, StyleSheet helpers, variant engines, preset bridge
+      # other adapters only when a real third-party boundary appears
+  components/                   # Presentation — the five public UI components
+    <Component>/
+      <Component>.tsx
+      <Component>.types.ts
+      <Component>.styles.ts     # Composes core recipes via integrations — no raw third-party imports
+      <Component>.test.tsx
+      index.ts                  # Component-local public re-exports
+  index.ts                      # Package public API facade (only export surface for components/types)
+```
+
+Secondary package entries (preset, etc.) may live under `core/integrations/` or a dedicated preset module, but they are still shipped only through package `exports` — never by asking consumers to deep-import internals.
+
+### Dependency direction (enforced on every change)
+
+```
+core/tokens  →  core/styles  →  core/logic
+                                    ↓
+                         core/integrations/*
+                                    ↓
+                            components/*
+                                    ↓
+                              src/index.ts
+```
+
+- Inner layers never import outer layers.
+- `components/` never import a third-party package except `react` / `react-native`.
+- Changing a third-party library (NativeWind, merge util, variant helper, list helper, …) edits `core/integrations/` only. Components and `core/tokens|styles|logic` stay untouched unless the port contract itself changes.
+
+---
+
+### Layer: `core/tokens`
+
+**Responsibility:** Single source of truth for every design value the library owns.
+
+**Contains:** colour tokens, status→tone maps, spacing scale, typography scale, radius, border treatment. Values are pure data (objects, consts, maps) — no React, no class strings that embed magic numbers elsewhere.
+
+**May import:** nothing from other `src/` layers; no third-party packages.
+
+**Must not:** render UI; call NativeWind; duplicate a value that already has a token name; leak hex/spacing/radius literals into other layers.
+
+**Token contract (canonical — define once here, reference everywhere):**
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `bg` | `#FFFFFF` | screen background |
+| `surface` | `#F6F7F9` | cards, list rows |
+| `border` | `#E3E6EA` | hairlines, input borders |
+| `fg` | `#111827` | primary text |
+| `fg-muted` | `#6B7280` | secondary text, helper text |
+| `primary` | `#1D4ED8` | primary actions |
+| `primary-fg` | `#FFFFFF` | text on primary |
+| `danger` | `#DC2626` | destructive actions, error text |
+| `warning` | `#D97706` | overdue, blocked |
+| `success` | `#15803D` | done |
+
+Status → token: `open` → `fg-muted`, `in_progress` → `primary`, `blocked` → `warning`, `done` → `success`. Priority is text-only except `urgent` → `danger`.
+
+Spacing (4-point scale): `1=4`, `2=8`, `3=12`, `4=16`, `6=24`, `8=32`. Screen horizontal padding and vertical rhythm between blocks use spacing `4`.
+
+Typography: `title` 22/600, `heading` 17/600, `body` 15/400, `label` 13/500, `caption` 12/400. System font only — no custom font loading.
+
+Radius `10` on cards, inputs, and buttons. No shadows — hairline border instead.
+
+**SOLID in this layer:**
+- **S** — tokens only; no interaction behaviour.
+- **O** — add tokens; do not fork values per component.
+- **L** — status aliases remain substitutable for the base tones they map to.
+- **I** — export narrow maps (colour, space, type, radius, status), not one mandatory god object.
+- **D** — nothing above invents design values; everything reads tokens.
+
+---
+
+### Layer: `core/styles`
+
+**Responsibility:** Named, reusable style recipes built from tokens — the vocabulary components compose.
+
+**Contains:** semantic recipes (button surfaces, field chrome, badge tones, type roles) expressed as contracts or token-backed class fragments defined once.
+
+**May import:** `core/tokens` only.
+
+**Must not:** import third-party styling libraries; hard-code hex/spacing/radius; copy-paste the same recipe into two components.
+
+**SOLID in this layer:**
+- **S** — recipes only; no React render, no adapter code.
+- **O** — new variants add recipes or recipe keys; existing recipes stay stable.
+- **L** — a recipe used in two places must mean the same visual contract in both.
+- **I** — small recipe groups per concern (button vs field vs badge), not one mega stylesheet module.
+- **D** — depends on tokens, not on NativeWind APIs.
+
+---
+
+### Layer: `core/logic`
+
+**Responsibility:** Pure library behaviour with no UI framework.
+
+**Contains:** option identity, controlled/uncontrolled helpers, list filtering, validation display rules, anything testable without rendering.
+
+**May import:** `core/tokens`, `core/styles` (only if logic needs semantic constants — prefer tokens).
+
+**Must not:** import React, React Native, NativeWind, or any third-party package; perform I/O.
+
+**SOLID in this layer:**
+- **S** — one concern per module.
+- **O** — extend with new functions; avoid breaking existing pure contracts.
+- **L** — interchangeable helpers honour the same input/output guarantees.
+- **I** — callers take only the functions they need.
+- **D** — no dependency on outer layers or vendors.
+
+---
+
+### Layer: `core/integrations`
+
+**Responsibility:** Isolate every third-party dependency behind adapters or providers so a dependency upgrade or replacement edits this layer only.
+
+**Contains:**
+- Styling adapters (`integrations/styling`): apply Tailwind/NativeWind, merge consumer overrides with defaults, build variants from `core/styles` recipes, bridge theme/preset into runtime.
+- Optional providers that supply theme/styling capabilities inward.
+- Thin wrappers around any other non-platform library the package adopts later (list virtualization helpers, etc.).
+
+**May import:** `core/tokens`, `core/styles`, `core/logic`, and the specific third-party packages being adapted.
+
+**Must not:** implement product UI; be deep-imported by published-package consumers; duplicate token values (read them from `core/tokens`).
+
+**SOLID in this layer:**
+- **S** — one adapter family per dependency concern (class merge ≠ unrelated future adapters).
+- **O** — new third-party behaviour appears as a new adapter or extended provider port, not edits scattered through components.
+- **L** — any adapter implementing a styling contract must honour the same override semantics (defaults + consumer override; last-wins on conflicts).
+- **I** — components depend on small ports (`composeClassName`, `createVariants`, theme accessors), not on the full third-party SDK surface.
+- **D** — components depend on integration ports; integrations implement those ports with third-party details.
+
+**Platform exception:** `react` and `react-native` are peer platform APIs. Components may import them directly. Every other library (NativeWind, `tailwind-merge`, `cva`, virtualization helpers, etc.) enters only through `core/integrations/`.
+
+---
+
+### Layer: `components/`
+
+**Responsibility:** Render the five public components; wire props, accessibility, refs, and composition; apply default theme styling from `core` via `integrations`.
+
+**Contains:** only the five component vertical slices.
+
+**May import:** `core/tokens` (read-only semantics if needed), `core/styles`, `core/logic`, `core/integrations` ports, `react`, `react-native`, and other components only via that component’s `index.ts`.
+
+**Must not:**
+- Import NativeWind, Tailwind merge utilities, variant libraries, or any other third-party package directly.
+- Hard-code colours, spacing, type sizes, or radii that exist as tokens.
+- Use ad-hoc inline style objects or one-off style literals for theme concerns.
+- Fetch data, navigate, or encode consuming-app domain types.
+- Bypass `src/index.ts` as the package’s public export path.
+
+**Per-component files:**
+- `<Component>.tsx` — render + local UI state.
+- `<Component>.types.ts` — exported prop contract.
+- `<Component>.styles.ts` — composes `core` recipes through integration ports only.
+- `<Component>.test.tsx` — colocated tests.
+- `index.ts` — re-exports the component and its props type for intra-package use.
+
+**SOLID in this layer:**
+- **S** — rendering + local UI state only.
+- **O** — extend via props (`variant`, `size`, `className`, `style`, slots/render props), not by forking components.
+- **L** — consumer-supplied render props/slots must not break documented states (loading, disabled, error).
+- **I** — focused props (`onPress`, `value`, `onChangeText`, …); no catch-all handler bags.
+- **D** — depend on `core` recipes and `integrations` ports, never on concrete third-party modules.
+
+---
+
+### Layer: `src/index.ts` (public API facade)
+
+**Responsibility:** Single auditable export surface for the installable library.
+
+**Rules:**
+- Re-export every public component and its `*Props` type by **explicit named export**. No `export *`.
+- Required exports at minimum: `Button`, `ButtonProps`, `Text`, `TextProps`, `TextField`, `TextFieldProps`, `Select`, `SelectProps`, `Badge`, `BadgeProps`.
+- If it is not exported here, it is not public API — consumers and demos must not deep-import `src/components/...` or `src/core/...` internals.
+- Adding, removing, or renaming an export, or changing a prop’s required/optional status, is a breaking change; call it out in the commit (`feat(button)!: …`) and log it under `docs/decisions.md` §1 (defend) per `030-decisions.mdc` when intentional.
+- Component-folder `index.ts` files exist for intra-package imports only; the package boundary remains `src/index.ts` plus documented secondary entries such as the preset (`fieldops-ui/preset` or equivalent package export).
+
+---
+
+## Styling system (tokens, defaults, overrides)
+
+- **NativeWind v4** is the `className` engine; **Tailwind CSS v3** is the host config/scan toolchain. Both only via `core/integrations/styling` + shipped preset. Components never import the engine.
+- **Dual path:** defaults from tokens as (1) class recipes for NativeWind hosts and (2) StyleSheet recipes for all hosts. Consumer `className` merges last-wins per utility group; consumer `style` wins last in the RN style array. See `060-nativewind.mdc`.
+- Behaviour props (`size`, `variant`, …) remain visible regardless of style overrides.
+- Responsive phone/tablet/foldable: preset/host `screens` + optional responsive classes — not `useLayoutEffect` size machines.
+- **No duplicated design values:** a colour, space, type step, radius, or status tone exists once in tokens and is referenced by both recipe forms.
+- **No ad-hoc theme literals** in components: no scattered hex / magic spacing / one-off `style={{ … }}` for design-spec concerns (token StyleSheet recipes and consumer overrides are the allowed `style` uses).
+- Status visuals for `Badge` use library-owned tone/status mappings from tokens. Do not import status enums from a host app.
+- Radius 10 and hairline borders are tokenized once and reused for every rounded surface that shares the spec.
+- Publish/examples law: `070-publish.mdc`.
+
+## Anti-patterns (reject in review)
+
+- Component file importing `nativewind`, `tailwind-merge`, `class-variance-authority`, or similar directly.
+- Claiming Tailwind utilities work on RN without NativeWind.
+- Shipping `example-*` apps inside the npm tarball.
+- Copy-pasted class strings across components that should be a `core/styles` recipe.
+- Hex or spacing literals outside `core/tokens`.
+- `export *` from `src/index.ts`.
+- A sixth “helper” public component that is really app UI.
+- Putting adapter code inside `components/*/`.
+- Documenting architecture by name-dropping “clean” / “SOLID” without the layer rules above — the folder contracts *are* the architecture.

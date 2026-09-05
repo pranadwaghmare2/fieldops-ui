@@ -1,0 +1,113 @@
+---
+description: TypeScript, React Native, lint, and documentation standards for fieldops-ui
+alwaysApply: true
+---
+
+# Coding & documentation — fieldops-ui
+
+Architecture and import boundaries live in `000-architecture.mdc`. This file covers how code is written and documented inside those layers.
+
+## TypeScript
+
+- `strict: true` in tsconfig. No exceptions. No `any` — use `unknown` and narrow, or generics.
+- No non-null assertions (`!`) outside test files. If a value can be undefined, type it as such and handle it.
+- Every prop in an exported `*Props` type gets its own `/** ... */` comment directly above the prop — not one comment for the whole interface. Consumers get per-prop autocomplete without opening source.
+- Prefer discriminated unions over boolean flag soup for non-trivial internal state machines:
+  `{ status: 'idle' } | { status: 'loading' } | { status: 'error'; error: Error }`
+  over `{ isLoading: boolean; isError: boolean; error?: Error }`.
+- Generic list/select APIs are generic in TypeScript (`<T,>`), not `any[]` with runtime casts.
+
+## React / React Native
+
+- Function components only.
+- `forwardRef` on every component that wraps a native pressable or text input so consumers can attach refs for focus management.
+- No side effects in render. `useEffect` synchronizes with external systems; derived values are computed inline or with `useMemo`.
+- Accessibility props are required on every interactive primitive: `accessibilityRole`, `accessibilityLabel`, `accessibilityState`.
+- Boolean props are predicates: `isDisabled`, `isLoading` — never treat `undefined` and `false` as different behavioural modes by accident.
+- Prefer named exports. One component per file; file name matches the component name.
+- No inline object/array literals passed as props in hot paths (list item renderers) — hoist or memoize so memoized rows stay stable.
+
+## Component behaviour contracts
+
+- **Button** — variants `primary` | `secondary` | `ghost` | `destructive`; sizes `sm` | `md` | `lg`; loading and disabled; optional leading icon; `className` + `style`.
+- **Text** — typographic scale from tokens (`title` | `heading` | `body` | `label` | `caption`); `className` + `style`.
+- **TextField** — label, placeholder, helper text, error state, optional right adornment; usable with a controlled form library (`value` / `onChangeText` or documented equivalents); `className` + `style`.
+- **Select** — single-select from options; usable with a long list; error state; `className` + `style`.
+- **Badge** — one visual treatment per status tone from the token status map; `className` + `style`.
+
+## Styling in code (enforce with architecture)
+
+- Components obtain default theme styling through `core/integrations/styling` ports and `core/styles` recipes — never by importing NativeWind/Tailwind helpers directly.
+- Dual override path (required on public components):
+  - `className` — NativeWind hosts; merge via shared `composeClassName` (last-wins per utility group).
+  - `style` — all hosts; token StyleSheet defaults + consumer `style` last in the array.
+- Behaviour props (`variant`, `size`, `isLoading`, …) stay on the API even when styles are overridden.
+- Do not repeat style literals. If two components need the same visual fragment, promote it to `core/styles` (or tokens if it is a raw value) and derive both class and StyleSheet forms from tokens.
+- Do not invent one-off theme `style={{ ... }}` with raw hex/spacing in components — use token recipes. Consumer-passed `style` props are fine.
+
+## DRY without speculative abstraction
+
+- Duplication across two call sites is acceptable. On the third, extract into `core/styles`, `core/logic`, or an integration port.
+- Do not invent a generic abstraction for a single use site.
+- Shared behaviour that is not third-party isolation belongs in `core/logic` or `core/styles`, not in a random `utils/` dump that bypasses layering.
+
+## Lint & format
+
+- ESLint with type-aware TypeScript rules and `eslint-plugin-react-hooks`.
+- Prettier owns formatting — do not bikeshed style in review.
+- Do not silence lint with `eslint-disable` as a first resort. Fix the issue; only disable with a comment that explains a true false positive.
+
+## Documentation — public API
+
+Use full TSDoc on every exported component, prop type, hook, and public utility:
+
+```ts
+/**
+ * Pressable button with token-driven variants and sizes.
+ *
+ * Consumer `className` overrides internal utilities through the shared merge
+ * strategy (last-wins on conflicting utility groups). Consumer `style`
+ * overrides token StyleSheet defaults (RN array last-wins).
+ *
+ * @remarks
+ * Forwards its ref to the underlying `Pressable`. Styling goes through the
+ * integrations styling port — this file must not import NativeWind directly.
+ *
+ * @example
+ * ```tsx
+ * <Button variant="primary" onPress={handleSubmit} isLoading={isSubmitting}>
+ *   Save
+ * </Button>
+ * ```
+ */
+export const Button = forwardRef<View, ButtonProps>(...)
+```
+
+- `@example` is required on each of the five public components and must match the README usage example.
+- `@remarks` covers non-obvious behaviour: dual style path, merge strategy, ref forwarding, controlled state, composable escape hatch.
+- README: install steps + one usage example per component. README is task-oriented; TSDoc is API-reference-oriented — do not paste one into the other wholesale.
+
+## Documentation — internal logic (required)
+
+Document non-trivial internal functions in **both** places:
+
+1. **Above the function** — short block stating purpose and why this approach (trade-off, platform or layer constraint).
+2. **Inside the function** — inline `//` on non-obvious branches, loops, merges, or early returns. Explain reasoning, not a narration of obvious code.
+
+```ts
+/**
+ * Merges default recipe classes with consumer overrides.
+ * Lives in integrations so components never import the merge library directly.
+ */
+export function composeClassName(...inputs: ClassValue[]): string {
+  // Conflicting utilities must resolve by utility group, not string order alone;
+  // otherwise consumer overrides can be silently dropped after NativeWind resolves classes.
+  return mergeFn(inputs);
+}
+```
+
+Skip noise on one-line obvious helpers. Prefer signal over volume.
+
+## Decisions
+
+When choosing merge strategy, composable component, Select long-list approach, or any dependency adapter shape, update `docs/decisions.md` in the same turn per `030-decisions.mdc` (usually §1 defend; NativeWind/preset work also fills §2; deliberate non-builds fill §3).

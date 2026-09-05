@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Bob output
+lib/
+
+# Agent / brainstorming artifacts (do not commit plans)
+docs/superpowers/
+
+# Examples — native / tooling junk (apps themselves stay in git; not in npm)
+example-expo/node_modules/
+example-bare/node_modules/
+example/**/node_modules/
+example-expo/.expo/
+example-bare/.expo/
+example/**/.expo/
+**/Pods/
+**/build/
+*.xcworkspace
+!default.xcworkspace
+
+# Tests / coverage
+coverage/
+*.lcov
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Logs & OS
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+*.pem
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# TypeScript
+*.tsbuildinfo
